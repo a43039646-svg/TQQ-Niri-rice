@@ -104,6 +104,28 @@ install -m 0755 "$ROOT/scripts/integrate-niri.py" "$LOCAL_BIN/integrate-niri.py"
 NIRI_CONFIG="$CONFIG_HOME/niri/config.kdl"
 NIRI_CONFIG_BACKED_UP=0
 mkdir -p "$CONFIG_HOME/niri" "$BACKUP/config/niri"
+
+# A previous rice installer replaced the full Niri file. If that generated file
+# is still active, recover the newest user config backup before integrating binds.
+if [[ -f "$NIRI_CONFIG" ]] && grep -q '^// TQQ Niri Rice configuration\.' "$NIRI_CONFIG"; then
+    previous_config=""
+    backup_root="$STATE_HOME/tqq-niri-rice/backups"
+    if [[ -d "$backup_root" ]]; then
+        while IFS= read -r candidate; do
+            if ! grep -q '^// TQQ Niri Rice configuration\.' "$candidate"; then
+                previous_config="$candidate"
+                break
+            fi
+        done < <(find "$backup_root" -type f -path '*/config/niri/config.kdl' -print | LC_ALL=C sort -r)
+    fi
+    if [[ -n "$previous_config" ]]; then
+        cp -a "$previous_config" "$NIRI_CONFIG"
+        echo "Restored the previous Niri config from $previous_config before adding rice binds."
+    else
+        echo "Warning: this is a generated TQQ config and no original Niri backup was found; existing user binds cannot be recovered automatically." >&2
+    fi
+fi
+
 if [[ -e "$NIRI_CONFIG" ]]; then
     cp -a "$NIRI_CONFIG" "$BACKUP/config/niri/config.kdl"
     NIRI_CONFIG_BACKED_UP=1
