@@ -31,10 +31,6 @@ for arg in "$@"; do
     esac
 done
 
-if [[ ! -f "$CONFIG_HOME/niri/config.kdl" ]]; then
-    echo "Niri config not found at $CONFIG_HOME/niri/config.kdl. Start Niri once or create the config first." >&2
-    exit 1
-fi
 if ((INCLUDE_SDDM)) && ! command -v sddm >/dev/null 2>&1; then
     echo "SDDM is not installed. Install it before using --include-sddm." >&2
     exit 1
@@ -64,11 +60,17 @@ backup_config_dir() {
     fi
 }
 
-for config_name in matugen waybar swaync fuzzel rofi fetch; do
+for config_name in matugen waybar swaync fuzzel fetch; do
     backup_config_dir "$config_name"
     mkdir -p "$CONFIG_HOME/$config_name"
     cp -a "$ROOT/config/$config_name/." "$CONFIG_HOME/$config_name/"
 done
+
+# Rofi was used by an earlier setup; retain a backup, then remove the old config.
+if [[ -d "$CONFIG_HOME/rofi" ]]; then
+    backup_config_dir rofi
+    rm -rf -- "$CONFIG_HOME/rofi"
+fi
 
 if [[ "$CONFIG_HOME" != "$HOME/.config" ]]; then
     python3 - "$CONFIG_HOME" "$CONFIG_HOME/matugen/config.toml" "$CONFIG_HOME/fuzzel/fuzzel.ini" <<'PYXDG'
@@ -85,7 +87,7 @@ fi
 
 cp -an "$ROOT/wallpapers/." "$DATA_HOME/tqq-niri-rice/wallpapers/"
 
-for script_name in select-wallpaper power-menu configure-fetch-autostart check-dependencies install-dependencies install-sddm-theme wifi-menu.py configure-swaync.py; do
+for script_name in select-wallpaper wallpaper-picker.py power-menu configure-fetch-autostart check-dependencies install-dependencies install-sddm-theme wifi-menu.py configure-swaync.py; do
     if [[ -e "$LOCAL_BIN/$script_name" ]]; then
         mkdir -p "$BACKUP/local-bin"
         cp -a "$LOCAL_BIN/$script_name" "$BACKUP/local-bin/$script_name"
@@ -99,16 +101,29 @@ if [[ -e "$LOCAL_BIN/integrate-niri.py" ]]; then
 fi
 install -m 0755 "$ROOT/scripts/integrate-niri.py" "$LOCAL_BIN/integrate-niri.py"
 
-mkdir -p "$BACKUP/config/niri"
-cp -a "$CONFIG_HOME/niri/config.kdl" "$BACKUP/config/niri/config.kdl"
-if ! python3 "$LOCAL_BIN/integrate-niri.py" "$CONFIG_HOME/niri/config.kdl" "$LOCAL_BIN"; then
-    cp -a "$BACKUP/config/niri/config.kdl" "$CONFIG_HOME/niri/config.kdl"
-    echo "Niri config was restored from backup after integration failed: $BACKUP/config/niri/config.kdl" >&2
+NIRI_CONFIG="$CONFIG_HOME/niri/config.kdl"
+NIRI_CONFIG_BACKED_UP=0
+mkdir -p "$CONFIG_HOME/niri" "$BACKUP/config/niri"
+if [[ -e "$NIRI_CONFIG" ]]; then
+    cp -a "$NIRI_CONFIG" "$BACKUP/config/niri/config.kdl"
+    NIRI_CONFIG_BACKED_UP=1
+fi
+if ! python3 "$LOCAL_BIN/integrate-niri.py" "$NIRI_CONFIG" "$LOCAL_BIN"; then
+    if ((NIRI_CONFIG_BACKED_UP)); then
+        cp -a "$BACKUP/config/niri/config.kdl" "$NIRI_CONFIG"
+    else
+        rm -f -- "$NIRI_CONFIG"
+    fi
+    echo "Niri config generation failed; restored the previous config when available. Backup: $BACKUP/config/niri/config.kdl" >&2
     exit 1
 fi
 if command -v niri >/dev/null 2>&1 && ! niri validate; then
-    cp -a "$BACKUP/config/niri/config.kdl" "$CONFIG_HOME/niri/config.kdl"
-    echo "Niri validation failed; restored the previous config from $BACKUP/config/niri/config.kdl." >&2
+    if ((NIRI_CONFIG_BACKED_UP)); then
+        cp -a "$BACKUP/config/niri/config.kdl" "$NIRI_CONFIG"
+    else
+        rm -f -- "$NIRI_CONFIG"
+    fi
+    echo "Niri validation failed; restored the previous config when available. Backup: $BACKUP/config/niri/config.kdl" >&2
     exit 1
 fi
 
