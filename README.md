@@ -19,9 +19,22 @@ An optional SDDM theme is included under `config/sddm/TQQ`. It uses `imag1es.jpe
 
 The rice supports several Linux distributions. The installer checks its required commands and asks whether to install missing dependencies when run in a terminal. Package installation is also available explicitly with `--install-deps`; use `--skip-deps` to skip the prompt. The package manager will show its proposed changes and ask for confirmation. For distributions without a configured package recipe, install the listed dependencies manually.
 
+Clone the repository and enter its directory:
+
+```bash
+git clone https://github.com/a43039646-svg/TQQ-Niri-rice.git
+cd TQQ-Niri-rice
+```
+
+You can also use **Code → Download ZIP** on GitHub, extract the archive, and open a terminal in the extracted `TQQ-Niri-rice` folder.
+
+Then run the installer:
+
 ```bash
 ./install.sh
 ```
+
+The installer needs an existing Niri config at `~/.config/niri/config.kdl` with a `binds {}` block. It adds the rice startup entries and keybindings while preserving the rest of that config.
 
 To install dependencies explicitly:
 
