@@ -11,7 +11,7 @@ A Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. 
 - **Wallpaper switching:** `Mod+W` opens the preview panel, `awww` applies the wallpaper with a transition when available, and `swaybg` is the fallback.
 - **Wallpaper persistence:** the chosen image and palette are restored when Niri starts.
 - **3D Fetch support:** an optional config for [areofyl/fetch](https://github.com/areofyl/fetch), with guarded shell autostart. Existing Fetch/Fastfetch startup is preserved.
-- **Niri config:** the installer backs up the existing config, then replaces it with the rice's Niri config.
+- **Niri config:** the installer backs up the existing config and preserves its settings and keybindings, adding only the rice startup entries and free keybindings.
 
 An optional SDDM theme is included under `config/sddm/TQQ`. It uses `imag1es.jpeg` as its background and follows the supplied reference with a large two-line clock, a dark glass-like panel, and a slow wallpaper zoom. To install and select it, run `./scripts/install-sddm-theme` or pass `--include-sddm` to the main installer. The SDDM theme installer backs up the previous theme and its own config snippet; it does not restart SDDM. It requires SDDM to already be installed.
 
@@ -34,7 +34,7 @@ Then run the installer:
 ./install.sh
 ```
 
-The installer replaces the old Niri config with the rice config and saves the previous file in its dated backup directory. It can also create the Niri config when one does not exist yet.
+The installer keeps the existing Niri config and keybindings, saves a dated backup, and adds the rice startup entries plus wallpaper, power, and Fuzzel keybindings on keys that are not already in use.
 
 To install dependencies explicitly:
 
@@ -42,9 +42,9 @@ To install dependencies explicitly:
 ./install.sh --install-deps
 ```
 
-The installer backs up the existing Waybar, SwayNC, Fuzzel, Matugen, Fetch, and Niri configs under `~/.local/state/tqq-niri-rice/backups/`. It copies the included wallpapers to `${XDG_DATA_HOME:-~/.local/share}/tqq-niri-rice/wallpapers/`, installs helpers to `~/.local/bin/`, and replaces the old Niri config with the rice config.
+The installer backs up the existing Waybar, SwayNC, Fuzzel, Matugen, Fetch, and Niri configs under `~/.local/state/tqq-niri-rice/backups/`. It copies the included wallpapers to `${XDG_DATA_HOME:-~/.local/share}/tqq-niri-rice/wallpapers/` and installs helpers to `~/.local/bin/`. Existing Niri bindings are preserved; rice bindings use a fallback key if their preferred key is already occupied.
 
-The regular installer does not change the display manager or install SDDM. Existing Niri and component configs are backed up before the rice files replace them.
+The regular installer does not change the display manager or install SDDM. Existing Niri and component configs are backed up before the rice files are installed. If an older version of this rice replaced the Niri config, the installer tries to restore the newest original config backup first.
 
 ### Dependencies
 
