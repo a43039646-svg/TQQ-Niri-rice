@@ -73,6 +73,45 @@ set_wallpaper() {
         return 1
     fi
 
+    if [[ -f "$config_home/fetch/config" ]]; then
+        python3 - "$config_home/waybar/colors.css" "$config_home/fetch/config" <<'PYFETCH'
+from pathlib import Path
+import re
+import sys
+
+palette = Path(sys.argv[1]).read_text()
+fetch_config = Path(sys.argv[2])
+match = re.search(r"(?m)^@define-color primary #([0-9a-fA-F]{6});", palette)
+if not match:
+    raise SystemExit("Matugen's Waybar palette has no primary hex color")
+
+red, green, blue = (int(match.group(1)[i:i + 2], 16) for i in (0, 2, 4))
+cube = [0, 95, 135, 175, 215, 255]
+colors = [
+    (16 + 36 * r + 6 * g + b, (rv, gv, bv))
+    for r, rv in enumerate(cube)
+    for g, gv in enumerate(cube)
+    for b, bv in enumerate(cube)
+]
+colors.extend((232 + n, (8 + 10 * n,) * 3) for n in range(24))
+ansi = min(
+    colors,
+    key=lambda item: sum(
+        (channel - value) ** 2
+        for channel, value in zip((red, green, blue), item[1])
+    ),
+)[0]
+
+text = fetch_config.read_text()
+setting = f"label_color={ansi}"
+if re.search(r"(?m)^label_color=.*$", text):
+    text = re.sub(r"(?m)^label_color=.*$", setting, text, count=1)
+else:
+    text = text.rstrip() + "\n" + setting + "\n"
+fetch_config.write_text(text)
+PYFETCH
+    fi
+
     if ((wait_for_components)); then
         local attempt
         for attempt in {1..30}; do
