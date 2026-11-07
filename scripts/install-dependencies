@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 CHECK="$ROOT/scripts/check-dependencies"
+export PATH="$HOME/.local/bin:$PATH"
 
 if "$CHECK"; then
     echo "Required TQQ rice dependencies are already installed."
@@ -26,12 +27,51 @@ run_privileged() {
     fi
 }
 
-install_matugen_from_cargo() {
+install_matugen() {
     if command -v matugen >/dev/null 2>&1; then
         return 0
     fi
-    if ! command -v cargo >/dev/null 2>&1; then
-        echo "Matugen is not packaged for this release and Cargo is unavailable; install Matugen from https://github.com/InioX/matugen." >&2
+
+    if [[ "$(uname -m)" == x86_64 ]]; then
+        local url="https://github.com/InioX/matugen/releases/download/v4.2.0/matugen-4.2.0-x86_64.tar.gz"
+        local expected_sha="a2e3b50e49ed6439999ba3c252ed04fabd98ee4e9d12e5e5dff2e66370569751"
+        local temp_dir binary
+        if ! command -v curl >/dev/null 2>&1 || ! command -v sha256sum >/dev/null 2>&1; then
+            echo "Matugen's x86_64 release needs curl and sha256sum." >&2
+            return 1
+        fi
+        temp_dir="$(mktemp -d)"
+        if ! curl --fail --location --silent --show-error "$url" --output "$temp_dir/matugen.tar.gz"; then
+            rm -rf -- "$temp_dir"
+            return 1
+        fi
+        if ! printf '%s  %s\n' "$expected_sha" "$temp_dir/matugen.tar.gz" | sha256sum --check --status; then
+            echo "Matugen release checksum did not match; refusing to install it." >&2
+            rm -rf -- "$temp_dir"
+            return 1
+        fi
+        if ! tar -xzf "$temp_dir/matugen.tar.gz" -C "$temp_dir"; then
+            rm -rf -- "$temp_dir"
+            return 1
+        fi
+        binary="$(find "$temp_dir" -type f -name matugen -print -quit)"
+        if [[ -z "$binary" ]]; then
+            echo "Matugen executable was not found in the release archive." >&2
+            rm -rf -- "$temp_dir"
+            return 1
+        fi
+        install -D -m 0755 "$binary" "$HOME/.local/bin/matugen"
+        rm -rf -- "$temp_dir"
+        return 0
+    fi
+
+    if ! command -v cargo >/dev/null 2>&1 || ! command -v rustc >/dev/null 2>&1; then
+        echo "Matugen is not packaged for this release. Install Cargo and Rust 1.88+ or use a prebuilt release from https://github.com/InioX/matugen/releases." >&2
+        return 1
+    fi
+    rust_version="$(rustc --version | awk '{print $2}')"
+    if [[ "$(printf '%s\n' 1.88 "$rust_version" | sort -V | head -n1)" != "1.88" ]]; then
+        echo "Matugen v4.2.0 needs Rust 1.88 or newer; this system has $rust_version. Install a newer Rust toolchain before building Matugen." >&2
         return 1
     fi
     cargo install --locked --root "$HOME/.local" matugen
@@ -47,12 +87,14 @@ case "${ID:-}" in
         if ! command -v matugen >/dev/null 2>&1; then
             if apt-cache show matugen >/dev/null 2>&1; then
                 packages+=(matugen)
+            elif [[ "$(uname -m)" == x86_64 ]]; then
+                packages+=(curl)
             else
                 packages+=(cargo build-essential)
             fi
         fi
         run_privileged apt-get install "${packages[@]}"
-        install_matugen_from_cargo
+        install_matugen
         ;;
     arch|endeavouros|manjaro|cachyos)
         packages=(waybar swaync fuzzel rofi-wayland swaybg ttf-font-awesome ttf-jetbrains-mono hicolor-icon-theme python)
@@ -66,7 +108,7 @@ case "${ID:-}" in
         if ! command -v matugen >/dev/null 2>&1; then
             packages=(cargo base-devel)
             run_privileged pacman -S --needed "${packages[@]}"
-            install_matugen_from_cargo
+            install_matugen
         fi
         ;;
     fedora)
@@ -77,12 +119,14 @@ case "${ID:-}" in
         if ! command -v matugen >/dev/null 2>&1; then
             if dnf repoquery --available matugen 2>/dev/null | grep -q .; then
                 packages+=(matugen)
+            elif [[ "$(uname -m)" == x86_64 ]]; then
+                packages+=(curl)
             else
                 packages+=(cargo gcc make)
             fi
         fi
         run_privileged dnf install "${packages[@]}"
-        install_matugen_from_cargo
+        install_matugen
         ;;
     opensuse*|opensuse-tumbleweed|opensuse-leap)
         packages=(waybar SwayNotificationCenter fuzzel rofi swaybg fontawesome-fonts jetbrains-mono-fonts hicolor-icon-theme python3)
@@ -92,10 +136,14 @@ case "${ID:-}" in
         if ! command -v matugen >/dev/null 2>&1 && zypper search -x matugen 2>/dev/null | grep -q matugen; then
             packages+=(matugen)
         elif ! command -v matugen >/dev/null 2>&1; then
-            packages+=(cargo gcc make)
+            if [[ "$(uname -m)" == x86_64 ]]; then
+                packages+=(curl)
+            else
+                packages+=(cargo gcc make)
+            fi
         fi
         run_privileged zypper install "${packages[@]}"
-        install_matugen_from_cargo
+        install_matugen
         ;;
     *)
         echo "Automatic dependency installation is not configured for ${PRETTY_NAME:-$ID}. Install the packages listed by $CHECK manually." >&2
