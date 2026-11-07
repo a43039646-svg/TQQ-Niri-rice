@@ -6,6 +6,8 @@ export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 wallpaper_dir="${WALLPAPER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/tqq-niri-rice/wallpapers}"
 state_home="${XDG_STATE_HOME:-$HOME/.local/state}/tqq-niri-rice"
 state_file="$state_home/current-wallpaper"
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+matugen_config="$config_home/matugen/config.toml"
 picker="${WALLPAPER_PICKER:-$HOME/.local/bin/wallpaper-picker.py}"
 wait_for_components=0
 
@@ -50,8 +52,17 @@ set_wallpaper() {
         notify "Wallpaper changed, but Matugen is missing; colors were not updated."
         return 1
     fi
-    if ! matugen image "$image" -m dark; then
+    if [[ ! -r "$matugen_config" ]]; then
+        notify "Matugen config not found: $matugen_config"
+        return 1
+    fi
+    if ! matugen --config "$matugen_config" image "$image" -m dark; then
         notify "Wallpaper changed, but Matugen couldn't generate the new palette."
+        return 1
+    fi
+
+    if [[ ! -s "$config_home/waybar/colors.css" || ! -s "$config_home/swaync/colors.css" ]]; then
+        notify "Matugen ran, but the generated Waybar or SwayNC palette is missing. Check $matugen_config."
         return 1
     fi
 
