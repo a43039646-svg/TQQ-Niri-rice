@@ -8,10 +8,10 @@ A Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. 
 - **SwayNC quick settings:** volume and brightness sliders, media controls, Do Not Disturb, a Wi-Fi picker, and notifications. The installer enables brightness only when it finds a backlight device.
 - **Wallpaper preview:** a centered floating GTK panel displays each wallpaper and its character names in English; use Left/Right to browse, Enter to apply, and Escape to cancel.
 - **Fuzzel:** application launcher and plain-text power menu. Reboot and power-off ask for confirmation.
-- **Wallpaper switching:** `Mod+W` opens the preview panel, `awww` applies the wallpaper with a transition when available, and `swaybg` is the fallback.
+- **Wallpaper switching:** `Mod+B` (Win+B) opens the preview panel and updates the Matugen palette; `awww` applies the wallpaper with a transition when available, and `swaybg` is the fallback.
 - **Wallpaper persistence:** the chosen image and palette are restored when Niri starts.
 - **3D Fetch support:** an optional config for [areofyl/fetch](https://github.com/areofyl/fetch), with guarded shell autostart. Existing Fetch/Fastfetch startup is preserved.
-- **Niri config:** the installer backs up the existing config and preserves its settings and keybindings, adding only the rice startup entries and free keybindings.
+- **Niri config:** the installer backs up the existing config and preserves its settings and keybindings, adding the rice startup entries and only the Win+B wallpaper binding.
 
 An optional SDDM theme is included under `config/sddm/TQQ`. It uses `imag1es.jpeg` as its background and follows the supplied reference with a large two-line clock, a dark glass-like panel, and a slow wallpaper zoom. To install and select it, run `./scripts/install-sddm-theme` or pass `--include-sddm` to the main installer. The SDDM theme installer backs up the previous theme and its own config snippet; it does not restart SDDM. It requires SDDM to already be installed.
 
@@ -34,7 +34,7 @@ Then run the installer:
 ./install.sh
 ```
 
-The installer keeps the existing Niri config and keybindings, saves a dated backup, and adds the rice startup entries plus wallpaper, power, and Fuzzel keybindings on keys that are not already in use.
+The installer keeps the existing Niri config and keybindings, saves a dated backup, and adds the rice startup entries plus one Win+B wallpaper and palette binding.
 
 To install dependencies explicitly:
 
@@ -42,7 +42,7 @@ To install dependencies explicitly:
 ./install.sh --install-deps
 ```
 
-The installer backs up the existing Waybar, SwayNC, Fuzzel, Matugen, Fetch, and Niri configs under `~/.local/state/tqq-niri-rice/backups/`. It copies the included wallpapers to `${XDG_DATA_HOME:-~/.local/share}/tqq-niri-rice/wallpapers/` and installs helpers to `~/.local/bin/`. Existing Niri bindings are preserved; rice bindings use a fallback key if their preferred key is already occupied.
+The installer backs up the existing Waybar, SwayNC, Fuzzel, Matugen, Fetch, and Niri configs under `~/.local/state/tqq-niri-rice/backups/`. It copies the included wallpapers to `${XDG_DATA_HOME:-~/.local/share}/tqq-niri-rice/wallpapers/` and installs helpers to `~/.local/bin/`. Existing Niri bindings are preserved; Win+B is reserved for wallpaper selection and palette generation.
 
 The regular installer does not change the display manager or install SDDM. Existing Niri and component configs are backed up before the rice files are installed. If an older version of this rice replaced the Niri config, the installer tries to restore the newest original config backup first.
 
@@ -72,13 +72,11 @@ On other distributions, install the equivalent Git, compiler toolchain, and Make
 
 ## Keybindings
 
-The rice binds these keys in the generated Niri config:
+The rice adds one wallpaper and palette shortcut to the existing Niri config and leaves the other bindings as they are:
 
 | Action | Preferred key |
 | --- | --- |
-| Preview/apply wallpaper and update colors | `Mod+W` |
-| Open power menu | `Mod+E` |
-| Open Fuzzel app launcher | `Mod+D` |
+| Preview/apply wallpaper and update colors | `Mod+B` (Win+B) |
 
 Waybar's audio capsule opens the SwayNC quick-settings panel. Right-clicking the notification capsule toggles Do Not Disturb.
 
