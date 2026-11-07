@@ -56,13 +56,20 @@ set_wallpaper() {
         notify "Matugen config not found: $matugen_config"
         return 1
     fi
-    if ! matugen --config "$matugen_config" image "$image" -m dark; then
-        notify "Wallpaper changed, but Matugen couldn't generate the new palette."
+    matugen_log="$state_home/matugen.log"
+    if ! matugen -c "$matugen_config" image "$image" -m dark >"$matugen_log" 2>&1; then
+        notify "Wallpaper changed, but Matugen failed. Details: $matugen_log"
         return 1
     fi
 
-    if [[ ! -s "$config_home/waybar/colors.css" || ! -s "$config_home/swaync/colors.css" ]]; then
-        notify "Matugen ran, but the generated Waybar or SwayNC palette is missing. Check $matugen_config."
+    if [[ ! -s "$config_home/waybar/colors.css" \
+        || ! -s "$config_home/swaync/colors.css" \
+        || ! -s "$config_home/fuzzel/colors.ini" ]] \
+        || grep -q 'Starter palette' \
+            "$config_home/waybar/colors.css" \
+            "$config_home/swaync/colors.css" \
+            "$config_home/fuzzel/colors.ini"; then
+        notify "Matugen did not replace the starter colors. Check $matugen_log and $matugen_config."
         return 1
     fi
 
