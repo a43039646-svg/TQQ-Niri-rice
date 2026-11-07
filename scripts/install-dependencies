@@ -34,7 +34,7 @@ install_matugen_from_cargo() {
         echo "Matugen is not packaged for this release and Cargo is unavailable; install Matugen from https://github.com/InioX/matugen." >&2
         return 1
     fi
-    cargo install --root "$HOME/.local" matugen
+    cargo install --locked --root "$HOME/.local" matugen
 }
 
 case "${ID:-}" in
