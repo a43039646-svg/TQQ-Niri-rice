@@ -3,7 +3,7 @@ set -euo pipefail
 
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
-wallpaper_dir="${WALLPAPER_DIR:-$HOME/.local/share/tqq-niri-rice/wallpapers}"
+wallpaper_dir="${WALLPAPER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/tqq-niri-rice/wallpapers}"
 state_home="${XDG_STATE_HOME:-$HOME/.local/state}/tqq-niri-rice"
 state_file="$state_home/current-wallpaper"
 wait_for_components=0
