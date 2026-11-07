@@ -80,7 +80,7 @@ install_matugen() {
 case "${ID:-}" in
     debian|ubuntu|linuxmint|pop)
         run_privileged apt-get update
-        packages=(waybar sway-notification-center fuzzel rofi swaybg fonts-font-awesome fonts-jetbrains-mono hicolor-icon-theme python3)
+        packages=(waybar sway-notification-center fuzzel swaybg fonts-font-awesome fonts-jetbrains-mono hicolor-icon-theme python3 python3-gi gir1.2-gtk-3.0)
         if ! command -v wpctl >/dev/null 2>&1; then
             packages+=(pipewire-bin wireplumber)
         fi
@@ -97,7 +97,7 @@ case "${ID:-}" in
         install_matugen
         ;;
     arch|endeavouros|manjaro|cachyos)
-        packages=(waybar swaync fuzzel rofi-wayland swaybg ttf-font-awesome ttf-jetbrains-mono hicolor-icon-theme python)
+        packages=(waybar swaync fuzzel swaybg ttf-font-awesome ttf-jetbrains-mono hicolor-icon-theme python python-gobject gtk3)
         if ! command -v wpctl >/dev/null 2>&1; then
             packages+=(pipewire wireplumber)
         fi
@@ -112,7 +112,7 @@ case "${ID:-}" in
         fi
         ;;
     fedora)
-        packages=(waybar SwayNotificationCenter fuzzel rofi swaybg fontawesome-fonts jetbrains-mono-fonts hicolor-icon-theme python3)
+        packages=(waybar SwayNotificationCenter fuzzel swaybg fontawesome-fonts jetbrains-mono-fonts hicolor-icon-theme python3 python3-gobject gtk3)
         if ! command -v wpctl >/dev/null 2>&1; then
             packages+=(pipewire-utils wireplumber)
         fi
@@ -129,7 +129,7 @@ case "${ID:-}" in
         install_matugen
         ;;
     opensuse*|opensuse-tumbleweed|opensuse-leap)
-        packages=(waybar SwayNotificationCenter fuzzel rofi swaybg fontawesome-fonts jetbrains-mono-fonts hicolor-icon-theme python3)
+        packages=(waybar SwayNotificationCenter fuzzel swaybg fontawesome-fonts jetbrains-mono-fonts hicolor-icon-theme python3 python3-gobject gtk3 typelib-1_0-Gtk-3_0)
         if ! command -v wpctl >/dev/null 2>&1; then
             packages+=(pipewire wireplumber)
         fi
