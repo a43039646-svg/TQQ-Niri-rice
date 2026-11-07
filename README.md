@@ -6,7 +6,7 @@ A Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. 
 
 - **Island Waybar:** transparent bar with floating capsules for workspaces, clock, notifications, network, audio, battery, and tray.
 - **SwayNC quick settings:** volume and brightness sliders, media controls, Do Not Disturb, a Wi-Fi picker, and notifications. The installer enables brightness only when it finds a backlight device.
-- **Wallpaper preview:** a GTK panel displays each wallpaper; use Left/Right to browse, Enter to apply, and Escape to cancel.
+- **Wallpaper preview:** a centered floating GTK panel displays each wallpaper and its character names in English; use Left/Right to browse, Enter to apply, and Escape to cancel.
 - **Fuzzel:** application launcher and plain-text power menu. Reboot and power-off ask for confirmation.
 - **Wallpaper switching:** `Mod+W` opens the preview panel, `awww` applies the wallpaper with a transition when available, and `swaybg` is the fallback.
 - **Wallpaper persistence:** the chosen image and palette are restored when Niri starts.
