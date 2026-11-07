@@ -50,7 +50,7 @@ The regular installer does not change the display manager or install SDDM. The N
 
 Required programs: Niri, Waybar, SwayNC (`swaync` and `swaync-client`), Fuzzel, Rofi, Matugen, PipeWire/WirePlumber (`wpctl`), Python 3, and the standard process tools `pgrep`/`pkill`. For wallpaper display, install `awww` and its daemon or `swaybg`. NetworkManager (`nmcli`) enables the Wi-Fi picker; `notify-send` and `brightnessctl` are optional.
 
-`scripts/check-dependencies` reports missing commands and package hints. `scripts/install-dependencies` has package recipes for Debian/Ubuntu, Arch, Fedora, and openSUSE. Package names and availability vary by release. The script installs Matugen through Cargo on releases without a package; Niri itself and optional awww transitions may need to be installed separately. The wallpaper switcher falls back to swaybg.
+`scripts/check-dependencies` reports missing commands and package hints. `scripts/install-dependencies` has package recipes for Debian/Ubuntu, Arch, Fedora, and openSUSE. Package names and availability vary by release. When Matugen is unavailable as a package, the installer uses its checksum-verified upstream x86_64 release; other architectures can build it with Rust 1.88 or newer. Niri itself and optional awww transitions may need to be installed separately. The wallpaper switcher falls back to swaybg.
 
 ### 3D Fetch
 
