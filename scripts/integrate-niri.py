@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add TQQ startup commands and free keybindings without replacing Niri settings."""
+"""Add TQQ startup commands and Win+B without replacing Niri settings."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -107,17 +107,14 @@ def main() -> int:
                 return candidate
         raise ValueError("No free keybinding among: " + ", ".join(candidates))
 
-    wallpaper_key = choose(["Mod+W", "Mod+Shift+W", "Mod+Alt+W"])
-    power_key = choose(["Mod+E", "Mod+Shift+E", "Mod+Alt+E"])
-    launcher_key = choose(["Mod+D", "Mod+Space", "Mod+R", "Mod+Shift+D"])
+    # Win+B is the requested wallpaper + palette action. Keep all other
+    # existing bindings (including Fuzzel and power-menu shortcuts) untouched.
+    wallpaper_key = choose(["Mod+B"])
 
     wallpaper = json.dumps(str(local_bin / "select-wallpaper"), ensure_ascii=False)
-    power = json.dumps(str(local_bin / "power-menu"), ensure_ascii=False)
     managed_binds = (
         "\n    // BEGIN TQQ NIRI BINDS\n"
         f"    {wallpaper_key} {{ spawn {wallpaper}; }}\n"
-        f"    {power_key} {{ spawn {power}; }}\n"
-        f"    {launcher_key} {{ spawn \"fuzzel\"; }}\n"
         "    // END TQQ NIRI BINDS\n"
     )
     if binds_match:
@@ -148,8 +145,9 @@ def main() -> int:
     window_rule = (
         "\n// BEGIN TQQ WALLPAPER WINDOW RULE\n"
         "window-rule {\n"
-        '    match app-id=r#"^io\\.github\\.tqqniri\\.WallpaperPicker$"#\n'
+        '    match title="^Choose a wallpaper$"\n'
         "    open-floating true\n"
+        "    open-focused true\n"
         "}\n"
         "// END TQQ WALLPAPER WINDOW RULE\n"
     )
@@ -158,8 +156,8 @@ def main() -> int:
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(text)
     print(
-        "Preserved the existing Niri config and added TQQ binds: "
-        f"{wallpaper_key} (wallpaper), {power_key} (power), {launcher_key} (Fuzzel)."
+        "Preserved existing Niri binds and added the wallpaper/palette shortcut: "
+        f"{wallpaper_key} (Win+B)."
     )
     return 0
 
