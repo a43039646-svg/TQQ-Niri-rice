@@ -76,6 +76,11 @@ def main() -> int:
         "",
         text,
     )
+    text = re.sub(
+        r"(?ms)^// BEGIN TQQ WALLPAPER WINDOW RULE\n.*?^// END TQQ WALLPAPER WINDOW RULE[ \t]*(?:\n|$)",
+        "",
+        text,
+    )
 
     binds_match = re.search(r"(?m)^([ \t]*)binds[ \t]*\{", text)
     if binds_match:
@@ -139,6 +144,16 @@ def main() -> int:
         binds_match = re.search(r"(?m)^([ \t]*)binds[ \t]*\{", text)
         insertion = binds_match.start() if binds_match else len(text)
         text = text[:insertion] + startup_block + text[insertion:]
+
+    window_rule = (
+        "\n// BEGIN TQQ WALLPAPER WINDOW RULE\n"
+        "window-rule {\n"
+        '    match app-id=r#"^io\\.github\\.tqqniri\\.WallpaperPicker$"#\n'
+        "    open-floating true\n"
+        "}\n"
+        "// END TQQ WALLPAPER WINDOW RULE\n"
+    )
+    text = text.rstrip() + "\n" + window_rule
 
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(text)
