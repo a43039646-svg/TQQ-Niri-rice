@@ -3,6 +3,7 @@ reload_apps = false
 
 [config.wallpaper]
 set = false
+command = "true"
 
 [templates.waybar]
 input_path = '~/.config/matugen/templates/colors.css'
