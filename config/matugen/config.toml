@@ -12,10 +12,6 @@ output_path = '~/.config/waybar/colors.css'
 input_path = '~/.config/matugen/templates/colors.css'
 output_path = '~/.config/swaync/colors.css'
 
-[templates.rofi]
-input_path = '~/.config/matugen/templates/colors.rasi'
-output_path = '~/.config/rofi/colors.rasi'
-
 [templates.fuzzel]
 input_path = '~/.config/matugen/templates/fuzzel-colors.ini'
 output_path = '~/.config/fuzzel/colors.ini'
