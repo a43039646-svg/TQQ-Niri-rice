@@ -1,6 +1,6 @@
 # TQQ Niri rice
 
-A Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. Choose a wallpaper in the visual preview with the arrow keys; Matugen then regenerates the Waybar, SwayNC, and Fuzzel colors from that image.
+A Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. Choose a wallpaper in the visual preview with the arrow keys; Matugen then regenerates the Waybar, SwayNC, and Fuzzel colors from that image, and updates 3D Fetch's label accent to the nearest terminal color.
 
 ## Included
 
@@ -10,7 +10,7 @@ A Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. 
 - **Fuzzel:** application launcher and plain-text power menu. Reboot and power-off ask for confirmation.
 - **Wallpaper switching:** `Mod+B` (Win+B) opens the preview panel and updates the Matugen palette; `awww` applies the wallpaper with a transition when available, and `swaybg` is the fallback.
 - **Wallpaper persistence:** the chosen image and palette are restored when Niri starts.
-- **3D Fetch support:** an optional config for [areofyl/fetch](https://github.com/areofyl/fetch), with guarded shell autostart. Existing Fetch/Fastfetch startup is preserved.
+- **3D Fetch support:** an optional config for [areofyl/fetch](https://github.com/areofyl/fetch), with guarded shell autostart. Its label accent follows the wallpaper palette; existing Fetch/Fastfetch startup is preserved.
 - **Niri config:** the installer backs up the existing config and preserves its settings and keybindings, adding the rice startup entries and only the Win+B wallpaper binding.
 
 An optional SDDM theme is included under `config/sddm/TQQ`. It uses `imag1es.jpeg` as its background and follows the supplied reference with a large two-line clock, a dark glass-like panel, and a slow wallpaper zoom. To install and select it, run `./scripts/install-sddm-theme` or pass `--include-sddm` to the main installer. The SDDM theme installer backs up the previous theme and its own config snippet; it does not restart SDDM. It requires SDDM to already be installed.
