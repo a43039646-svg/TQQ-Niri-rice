@@ -6,6 +6,7 @@ export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 wallpaper_dir="${WALLPAPER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/tqq-niri-rice/wallpapers}"
 state_home="${XDG_STATE_HOME:-$HOME/.local/state}/tqq-niri-rice"
 state_file="$state_home/current-wallpaper"
+picker="${WALLPAPER_PICKER:-$HOME/.local/bin/wallpaper-picker.py}"
 wait_for_components=0
 
 notify() {
@@ -94,7 +95,7 @@ case "${1:-pick}" in
     *) echo "Usage: $0 [pick|--restore|--set IMAGE]" >&2; exit 2 ;;
 esac
 
-for required in fuzzel matugen; do
+for required in matugen python3; do
     if ! command -v "$required" >/dev/null 2>&1; then
         notify "Missing required command: $required"
         exit 1
@@ -115,16 +116,10 @@ if ((${#wallpapers[@]} == 0)); then
     exit 1
 fi
 
-menu_items=()
-for image in "${wallpapers[@]}"; do
-    menu_items+=("${image##*/}")
-done
-selected="$(printf '%s\n' "${menu_items[@]}" | fuzzel --dmenu --prompt='Wallpaper > ' || true)"
+if [[ ! -x "$picker" ]]; then
+    notify "Wallpaper preview picker not found: $picker"
+    exit 1
+fi
+selected="$(python3 "$picker" "$wallpaper_dir" "$state_file" || true)"
 [[ -n "$selected" ]] || exit 0
-
-for index in "${!menu_items[@]}"; do
-    if [[ "${menu_items[$index]}" == "$selected" ]]; then
-        set_wallpaper "${wallpapers[$index]}"
-        exit
-    fi
-done
+set_wallpaper "$selected"
