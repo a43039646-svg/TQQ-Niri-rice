@@ -57,7 +57,7 @@ set_wallpaper() {
         return 1
     fi
     matugen_log="$state_home/matugen.log"
-    if ! matugen -c "$matugen_config" image "$image" -m dark >"$matugen_log" 2>&1; then
+    if ! matugen -c "$matugen_config" image "$image" -m dark --source-color-index 0 >"$matugen_log" 2>&1; then
         notify "Wallpaper changed, but Matugen failed. Details: $matugen_log"
         return 1
     fi
