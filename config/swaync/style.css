@@ -1,0 +1,71 @@
+@import url("colors.css");
+
+* {
+    font-family: sans-serif;
+    font-size: 13px;
+}
+
+.control-center {
+    color: @foreground;
+    background: alpha(@background, 0.97);
+    border: 1px solid alpha(@primary, 0.5);
+    border-radius: 16px;
+    padding: 12px;
+}
+
+.notification-row .notification-background,
+.widget-volume,
+.widget-mpris,
+.widget-title,
+.widget-dnd,
+.widget-buttons-grid,
+.widget-backlight {
+    color: @foreground;
+    background: @surface;
+    border: 1px solid alpha(@primary, 0.24);
+    border-radius: 12px;
+    margin: 5px 0;
+    padding: 10px;
+}
+
+.widget-title {
+    font-weight: bold;
+}
+
+.widget-volume scale trough,
+.widget-backlight scale trough {
+    background: alpha(@foreground, 0.18);
+    border-radius: 999px;
+    min-height: 6px;
+}
+
+.widget-volume scale highlight,
+.widget-backlight scale highlight {
+    background: @primary;
+    border-radius: 999px;
+}
+
+.widget-volume scale slider,
+.widget-backlight scale slider {
+    background: @foreground;
+    border-radius: 999px;
+    min-width: 14px;
+    min-height: 14px;
+}
+
+button {
+    color: @foreground;
+    background: alpha(@primary, 0.12);
+    border: 1px solid alpha(@primary, 0.24);
+    border-radius: 9px;
+    padding: 6px 10px;
+}
+
+button:hover {
+    color: @on_primary;
+    background: @primary;
+}
+
+.notification-row .notification-background {
+    border-radius: 12px;
+}

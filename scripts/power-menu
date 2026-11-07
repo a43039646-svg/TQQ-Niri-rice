@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+choice="$(printf '%s\n' \
+    "Lock screen" \
+    "Log out of Niri" \
+    "Suspend" \
+    "Reboot…" \
+    "Power off…" \
+    "Cancel" | fuzzel --dmenu --prompt='Power > ')" || exit 0
+
+case "$choice" in
+    "Lock screen")
+        if command -v swaylock >/dev/null 2>&1; then
+            exec swaylock
+        fi
+        exec loginctl lock-session
+        ;;
+    "Log out of Niri") exec niri msg action quit ;;
+    "Suspend") exec systemctl suspend ;;
+    "Reboot…")
+        confirm="$(printf '%s\n' "Cancel" "Confirm reboot" | fuzzel --dmenu --prompt='Confirm > ')" || exit 0
+        [ "$confirm" = "Confirm reboot" ] && exec systemctl reboot
+        ;;
+    "Power off…")
+        confirm="$(printf '%s\n' "Cancel" "Confirm power off" | fuzzel --dmenu --prompt='Confirm > ')" || exit 0
+        [ "$confirm" = "Confirm power off" ] && exec systemctl poweroff
+        ;;
+esac

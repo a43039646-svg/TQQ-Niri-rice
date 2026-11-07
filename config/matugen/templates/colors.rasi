@@ -1,0 +1,54 @@
+* {
+    text-color: {{colors.on_surface.default.hex}};
+}
+
+window {
+    background-color: {{colors.surface.default.hex}};
+    border: 2px;
+    border-color: {{colors.primary.default.hex}};
+    border-radius: 18px;
+}
+
+mainbox {
+    background-color: {{colors.surface.default.hex}};
+    padding: 18px;
+    spacing: 14px;
+}
+
+inputbar {
+    background-color: {{colors.surface_container_high.default.hex}};
+    text-color: {{colors.on_surface.default.hex}};
+    border-radius: 12px;
+    padding: 12px;
+}
+
+listview {
+    background-color: transparent;
+    spacing: 10px;
+}
+
+element {
+    background-color: {{colors.surface_container.default.hex}};
+    text-color: {{colors.on_surface.default.hex}};
+    border-radius: 14px;
+    padding: 14px;
+}
+
+element selected {
+    background-color: {{colors.primary.default.hex}};
+    text-color: {{colors.on_primary.default.hex}};
+}
+
+element-icon {
+    size: 48px;
+}
+
+element-text {
+    horizontal-align: 0.5;
+    vertical-align: 0.5;
+}
+
+scrollbar {
+    handle-color: {{colors.primary.default.hex}};
+    background-color: {{colors.surface_container.default.hex}};
+}

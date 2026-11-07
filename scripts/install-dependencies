@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+CHECK="$ROOT/scripts/check-dependencies"
+
+if "$CHECK"; then
+    echo "Required TQQ rice dependencies are already installed."
+    exit 0
+fi
+
+if [[ ! -r /etc/os-release ]]; then
+    echo "Cannot identify this Linux distribution. Install the packages listed by $CHECK manually." >&2
+    exit 1
+fi
+. /etc/os-release
+
+run_privileged() {
+    if ((EUID == 0)); then
+        "$@"
+    elif command -v sudo >/dev/null 2>&1; then
+        sudo "$@"
+    else
+        echo "Install sudo or run this script as root to install system packages." >&2
+        return 1
+    fi
+}
+
+install_matugen_from_cargo() {
+    if command -v matugen >/dev/null 2>&1; then
+        return 0
+    fi
+    if ! command -v cargo >/dev/null 2>&1; then
+        echo "Matugen is not packaged for this release and Cargo is unavailable; install Matugen from https://github.com/InioX/matugen." >&2
+        return 1
+    fi
+    cargo install --root "$HOME/.local" matugen
+}
+
+case "${ID:-}" in
+    debian|ubuntu|linuxmint|pop)
+        run_privileged apt-get update
+        packages=(waybar sway-notification-center fuzzel rofi swaybg fonts-font-awesome fonts-jetbrains-mono hicolor-icon-theme python3)
+        if ! command -v wpctl >/dev/null 2>&1; then
+            packages+=(pipewire-bin wireplumber)
+        fi
+        if ! command -v matugen >/dev/null 2>&1; then
+            if apt-cache show matugen >/dev/null 2>&1; then
+                packages+=(matugen)
+            else
+                packages+=(cargo build-essential)
+            fi
+        fi
+        run_privileged apt-get install "${packages[@]}"
+        install_matugen_from_cargo
+        ;;
+    arch|endeavouros|manjaro|cachyos)
+        packages=(waybar swaync fuzzel rofi-wayland swaybg ttf-font-awesome ttf-jetbrains-mono hicolor-icon-theme python)
+        if ! command -v wpctl >/dev/null 2>&1; then
+            packages+=(pipewire wireplumber)
+        fi
+        if ! command -v matugen >/dev/null 2>&1; then
+            packages+=(matugen)
+        fi
+        run_privileged pacman -S --needed "${packages[@]}"
+        if ! command -v matugen >/dev/null 2>&1; then
+            packages=(cargo base-devel)
+            run_privileged pacman -S --needed "${packages[@]}"
+            install_matugen_from_cargo
+        fi
+        ;;
+    fedora)
+        packages=(waybar SwayNotificationCenter fuzzel rofi swaybg fontawesome-fonts jetbrains-mono-fonts hicolor-icon-theme python3)
+        if ! command -v wpctl >/dev/null 2>&1; then
+            packages+=(pipewire-utils wireplumber)
+        fi
+        if ! command -v matugen >/dev/null 2>&1; then
+            if dnf repoquery --available matugen 2>/dev/null | grep -q .; then
+                packages+=(matugen)
+            else
+                packages+=(cargo gcc make)
+            fi
+        fi
+        run_privileged dnf install "${packages[@]}"
+        install_matugen_from_cargo
+        ;;
+    opensuse*|opensuse-tumbleweed|opensuse-leap)
+        packages=(waybar SwayNotificationCenter fuzzel rofi swaybg fontawesome-fonts jetbrains-mono-fonts hicolor-icon-theme python3)
+        if ! command -v wpctl >/dev/null 2>&1; then
+            packages+=(pipewire wireplumber)
+        fi
+        if ! command -v matugen >/dev/null 2>&1 && zypper search -x matugen 2>/dev/null | grep -q matugen; then
+            packages+=(matugen)
+        elif ! command -v matugen >/dev/null 2>&1; then
+            packages+=(cargo gcc make)
+        fi
+        run_privileged zypper install "${packages[@]}"
+        install_matugen_from_cargo
+        ;;
+    *)
+        echo "Automatic dependency installation is not configured for ${PRETTY_NAME:-$ID}. Install the packages listed by $CHECK manually." >&2
+        exit 1
+        ;;
+esac
+
+if ! "$CHECK"; then
+    echo "Some commands are still missing. Check the messages above and install those packages manually." >&2
+    exit 1
+fi

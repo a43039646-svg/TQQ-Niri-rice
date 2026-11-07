@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -u
+
+required=(niri waybar swaync swaync-client fuzzel rofi matugen wpctl python3 pgrep pkill)
+missing=()
+for command_name in "${required[@]}"; do
+    command -v "$command_name" >/dev/null 2>&1 || missing+=("$command_name")
+done
+if { ! command -v awww >/dev/null 2>&1 || ! command -v awww-daemon >/dev/null 2>&1; } \
+    && ! command -v swaybg >/dev/null 2>&1; then
+    missing+=("awww or swaybg")
+fi
+
+if ((${#missing[@]} == 0)); then
+    echo "All required TQQ rice commands are available."
+    exit 0
+fi
+
+printf 'Missing commands: %s\n' "${missing[*]}"
+if [[ -r /etc/os-release ]]; then
+    . /etc/os-release
+    case "${ID:-}" in
+        debian|ubuntu|linuxmint|pop)
+            echo "Debian-family packages: waybar sway-notification-center fuzzel rofi pipewire-bin wireplumber swaybg fonts-font-awesome fonts-jetbrains-mono"
+            echo "Matugen and awww may need their upstream release/package for your Debian version."
+            ;;
+        arch|endeavouros|manjaro)
+            echo "Arch packages: waybar swaync fuzzel rofi-wayland matugen awww pipewire wireplumber"
+            ;;
+        fedora)
+            echo "Fedora packages: waybar SwayNotificationCenter fuzzel rofi-wayland matugen awww pipewire wireplumber"
+            ;;
+        opensuse*|opensuse-tumbleweed|opensuse-leap)
+            echo "openSUSE package names vary by release; search for Waybar, SwayNotificationCenter, Fuzzel, Rofi Wayland, Matugen, awww and WirePlumber."
+            ;;
+        *)
+            echo "Install equivalent packages for your distribution: Waybar, SwayNC, Fuzzel, Rofi with Wayland support, Matugen, PipeWire/WirePlumber and awww or swaybg."
+            ;;
+    esac
+fi
+exit 1

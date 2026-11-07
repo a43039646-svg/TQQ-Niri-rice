@@ -1,0 +1,105 @@
+@import "colors.css";
+
+/* Island layout: a transparent bar with separate floating capsules. */
+* {
+    border: none;
+    border-radius: 0;
+    font-family: sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @foreground;
+}
+
+#workspaces,
+#clock,
+#custom-notification,
+#network,
+#pulseaudio,
+#battery,
+#tray {
+    background: alpha(@background, 0.92);
+    border: 1px solid alpha(@primary, 0.38);
+    border-radius: 18px;
+    margin: 5px 3px;
+    padding: 0 12px;
+    color: @foreground;
+}
+
+#workspaces {
+    padding: 0 5px;
+}
+
+#workspaces button {
+    color: alpha(@foreground, 0.62);
+    background: transparent;
+    border-radius: 14px;
+    margin: 4px 2px;
+    padding: 0 8px;
+    transition: color 140ms ease, background 140ms ease;
+}
+
+#workspaces button:hover {
+    color: @foreground;
+    background: alpha(@primary, 0.18);
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+    color: @foreground;
+    background: alpha(@primary, 0.34);
+}
+
+#workspaces button.urgent,
+#battery.critical:not(.charging) {
+    color: @error;
+}
+
+#clock {
+    font-weight: 700;
+    padding: 0 17px;
+}
+
+#custom-notification,
+#network,
+#pulseaudio,
+#battery {
+    padding: 0 12px;
+}
+
+#custom-notification:hover,
+#network:hover,
+#pulseaudio:hover,
+#battery:hover,
+#tray:hover {
+    background: alpha(@surface, 0.98);
+    border-color: alpha(@primary, 0.7);
+}
+
+#pulseaudio.muted,
+#network.disconnected {
+    color: alpha(@foreground, 0.58);
+}
+
+#battery.warning {
+    color: @secondary;
+}
+
+#tray > .passive { opacity: 0.68; }
+#tray > .active { opacity: 1; }
+#tray > .needs-attention {
+    background: alpha(@primary, 0.25);
+    border-radius: 10px;
+}
+
+tooltip {
+    background: @background;
+    color: @foreground;
+    border: 1px solid alpha(@primary, 0.55);
+    border-radius: 10px;
+    padding: 5px 8px;
+}

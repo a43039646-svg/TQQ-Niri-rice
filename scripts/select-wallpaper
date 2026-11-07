@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+
+wallpaper_dir="${WALLPAPER_DIR:-$HOME/.local/share/tqq-niri-rice/wallpapers}"
+state_home="${XDG_STATE_HOME:-$HOME/.local/state}/tqq-niri-rice"
+state_file="$state_home/current-wallpaper"
+wait_for_components=0
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send "TQQ Niri rice" "$1" || true
+}
+
+set_wallpaper() {
+    local image="$1"
+    [[ -r "$image" ]] || { notify "Can't read wallpaper: $image"; return 1; }
+
+    if command -v awww >/dev/null 2>&1; then
+        if ! awww query >/dev/null 2>&1 && command -v awww-daemon >/dev/null 2>&1; then
+            nohup awww-daemon >/dev/null 2>&1 </dev/null &
+            local attempt
+            for attempt in {1..30}; do
+                awww query >/dev/null 2>&1 && break
+                sleep 0.2
+            done
+        fi
+        if awww query >/dev/null 2>&1 && awww img --transition-type fade --transition-duration 0.7 -- "$image"; then
+            :
+        elif command -v swaybg >/dev/null 2>&1; then
+            pkill -x swaybg >/dev/null 2>&1 || true
+            nohup swaybg -i "$image" -m fill >/dev/null 2>&1 </dev/null &
+        else
+            notify "awww is unavailable and swaybg is not installed."
+            return 1
+        fi
+    elif command -v swaybg >/dev/null 2>&1; then
+        pkill -x swaybg >/dev/null 2>&1 || true
+        nohup swaybg -i "$image" -m fill >/dev/null 2>&1 </dev/null &
+    else
+        notify "Install awww or swaybg to display wallpapers."
+        return 1
+    fi
+
+    mkdir -p "$state_home"
+    printf '%s\n' "$image" > "$state_file"
+
+    if ! command -v matugen >/dev/null 2>&1; then
+        notify "Wallpaper changed, but Matugen is missing; colors were not updated."
+        return 1
+    fi
+    if ! matugen image "$image" -m dark; then
+        notify "Wallpaper changed, but Matugen couldn't generate the new palette."
+        return 1
+    fi
+
+    if ((wait_for_components)); then
+        local attempt
+        for attempt in {1..30}; do
+            pgrep -x waybar >/dev/null 2>&1 && break
+            sleep 0.1
+        done
+    fi
+    pkill -SIGUSR2 -x waybar >/dev/null 2>&1 || true
+    if command -v swaync-client >/dev/null 2>&1; then
+        if ((wait_for_components)); then
+            local attempt
+            for attempt in {1..30}; do
+                swaync-client -rs >/dev/null 2>&1 && break
+                sleep 0.1
+            done
+        else
+            swaync-client -rs >/dev/null 2>&1 || true
+        fi
+    fi
+    notify "Wallpaper and desktop palette updated."
+}
+
+case "${1:-pick}" in
+    --restore|restore)
+        if [[ -r "$state_file" ]]; then
+            IFS= read -r saved_image < "$state_file" || true
+            wait_for_components=1
+            [[ -n "${saved_image:-}" ]] && set_wallpaper "$saved_image"
+        fi
+        exit 0
+        ;;
+    --set|set)
+        [[ $# -ge 2 ]] || { echo "Usage: $0 --set IMAGE" >&2; exit 2; }
+        set_wallpaper "$2"
+        exit
+        ;;
+    pick) ;;
+    *) echo "Usage: $0 [pick|--restore|--set IMAGE]" >&2; exit 2 ;;
+esac
+
+for required in fuzzel matugen; do
+    if ! command -v "$required" >/dev/null 2>&1; then
+        notify "Missing required command: $required"
+        exit 1
+    fi
+done
+
+if [[ ! -d "$wallpaper_dir" ]]; then
+    notify "Wallpaper folder not found: $wallpaper_dir"
+    exit 1
+fi
+
+mapfile -d '' wallpapers < <(
+    find "$wallpaper_dir" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print0 | sort -z
+)
+
+if ((${#wallpapers[@]} == 0)); then
+    notify "No images found in $wallpaper_dir"
+    exit 1
+fi
+
+menu_items=()
+for image in "${wallpapers[@]}"; do
+    menu_items+=("${image##*/}")
+done
+selected="$(printf '%s\n' "${menu_items[@]}" | fuzzel --dmenu --prompt='Wallpaper > ' || true)"
+[[ -n "$selected" ]] || exit 0
+
+for index in "${!menu_items[@]}"; do
+    if [[ "${menu_items[$index]}" == "$selected" ]]; then
+        set_wallpaper "${wallpapers[$index]}"
+        exit
+    fi
+done

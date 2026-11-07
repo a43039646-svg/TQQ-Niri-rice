@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+THEME_ID="tqq-niri-rice"
+THEME_DIR="/usr/share/sddm/themes/$THEME_ID"
+CONF_DIR="/etc/sddm.conf.d"
+CONF_FILE="$CONF_DIR/99-$THEME_ID.conf"
+BACKUP="/var/backups/$THEME_ID/$(date +%Y%m%d-%H%M%S)"
+
+if ! command -v sddm >/dev/null 2>&1; then
+    echo "SDDM is not installed. Install SDDM first, then rerun this script." >&2
+    exit 1
+fi
+
+run_privileged() {
+    if ((EUID == 0)); then
+        "$@"
+    elif command -v sudo >/dev/null 2>&1; then
+        sudo "$@"
+    else
+        echo "Run this script as root or install sudo." >&2
+        return 1
+    fi
+}
+
+run_privileged mkdir -p "$BACKUP" "$THEME_DIR" "$CONF_DIR"
+if run_privileged test -d "$THEME_DIR"; then
+    run_privileged cp -a "$THEME_DIR" "$BACKUP/theme"
+fi
+if run_privileged test -e "$CONF_FILE"; then
+    run_privileged cp -a "$CONF_FILE" "$BACKUP/$(basename "$CONF_FILE")"
+fi
+
+run_privileged cp -a "$ROOT/config/sddm/TQQ/." "$THEME_DIR/"
+run_privileged chmod -R a+rX "$THEME_DIR"
+printf '[Theme]\nCurrent=%s\n' "$THEME_ID" | run_privileged tee "$CONF_FILE" >/dev/null
+
+echo "Installed SDDM theme '$THEME_ID'. Previous files (if any) were backed up to $BACKUP."
+echo "The active greeter will use it after SDDM is restarted or the system is rebooted."

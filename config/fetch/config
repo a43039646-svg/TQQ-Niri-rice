@@ -1,0 +1,21 @@
+# TQQ rice — 3D Fetch config
+os
+kernel
+shell
+wm
+cpu
+gpu
+memory
+swap
+colors
+
+label_color=blue
+separator=─
+box=0
+
+light=top-left
+spin=xy
+speed=1.0
+size=1.0
+depth=1.0
+height=24

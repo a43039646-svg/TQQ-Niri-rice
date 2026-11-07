@@ -1,0 +1,11 @@
+/* Starter palette; Matugen replaces this file after the first wallpaper selection. */
+* { text-color: #e5e7eb; }
+window { background-color: #111827; border: 2px; border-color: #60a5fa; border-radius: 18px; }
+mainbox { background-color: #111827; padding: 18px; spacing: 14px; }
+inputbar { background-color: #273449; text-color: #e5e7eb; border-radius: 12px; padding: 12px; }
+listview { background-color: transparent; spacing: 10px; }
+element { background-color: #1f2937; text-color: #e5e7eb; border-radius: 14px; padding: 14px; }
+element selected { background-color: #60a5fa; text-color: #0b1220; }
+element-icon { size: 48px; }
+element-text { horizontal-align: 0.5; vertical-align: 0.5; }
+scrollbar { handle-color: #60a5fa; background-color: #1f2937; }

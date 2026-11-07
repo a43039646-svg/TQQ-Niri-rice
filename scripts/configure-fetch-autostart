@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+shell_name="$(basename "${SHELL:-bash}")"
+case "$shell_name" in
+    bash) shell_rc="$HOME/.bashrc" ;;
+    zsh) shell_rc="$HOME/.zshrc" ;;
+    *)
+        printf 'Fetch autostart supports Bash and Zsh; detected %s.\n' "$shell_name" >&2
+        exit 0
+        ;;
+esac
+
+if command -v fastfetch >/dev/null 2>&1; then
+    fetch_command="fastfetch"
+    fetch_binary="fastfetch"
+elif command -v fetch >/dev/null 2>&1; then
+    fetch_command="fetch --box --shading-mode sextants"
+    fetch_binary="fetch"
+else
+    fetch_command=""
+    fetch_binary=""
+fi
+
+python3 - "$shell_rc" "$fetch_command" "$fetch_binary" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+command = sys.argv[2]
+binary = sys.argv[3]
+marker = "# TQQ_FETCH_AUTOSTART:"
+managed = re.compile(
+    r"(?ms)^# TQQ_FETCH_AUTOSTART:[^\n]*\n.*?^fi[ \t]*(?:\n|$)"
+)
+
+try:
+    original = path.read_text() if path.exists() else ""
+except OSError as exc:
+    print(f"Cannot read {path}: {exc}", file=sys.stderr)
+    raise SystemExit(1)
+
+blocks = list(managed.finditer(original))
+if marker in original and not blocks:
+    print(f"Found an incomplete TQQ Fetch marker in {path}; leaving it unchanged.", file=sys.stderr)
+    raise SystemExit(1)
+
+text = managed.sub("", original)
+active_lines = [line for line in text.splitlines() if not line.lstrip().startswith("#")]
+has_existing_startup = False
+for line in active_lines:
+    probe = re.sub(
+        r"\b(?:command\s+-v|which)\s+(?:fastfetch|fetch)\b",
+        "",
+        line,
+        flags=re.IGNORECASE,
+    )
+    if re.search(r"\b(?:fastfetch|fetch)\b", probe, flags=re.IGNORECASE):
+        has_existing_startup = True
+        break
+
+if has_existing_startup:
+    if blocks:
+        path.write_text(text)
+        print("Existing Fetch/Fastfetch startup found; removed the duplicate TQQ block.")
+    else:
+        print("Existing Fetch/Fastfetch startup found; left the shell config unchanged.")
+    raise SystemExit(0)
+
+if not command:
+    if blocks:
+        path.write_text(text)
+    print("Neither fastfetch nor 3D fetch is installed; skipped shell startup setup.")
+    raise SystemExit(0)
+
+block = (
+    marker + " run in interactive shells only.\n"
+    "if [[ $- == *i* ]] && command -v " + binary + " >/dev/null 2>&1; then\n"
+    "    " + command + "\n"
+    "fi"
+)
+if text and not text.endswith("\n"):
+    text += "\n"
+if text and not text.endswith("\n\n"):
+    text += "\n"
+path.write_text(text + block + "\n")
+print(f"Added one interactive-shell startup for {command} to {path}.")
+PY

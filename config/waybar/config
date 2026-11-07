@@ -1,0 +1,77 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 42,
+  "margin-top": 8,
+  "margin-left": 12,
+  "margin-right": 12,
+  "spacing": 8,
+  "modules-left": ["niri/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": ["custom/notification", "network", "pulseaudio", "battery", "tray"],
+  "niri/workspaces": {
+    "format": "{icon}",
+    "sort-by-id": true,
+    "all-outputs": true,
+    "format-icons": {
+      "focused": "●",
+      "active": "●",
+      "default": "○",
+      "empty": "○",
+      "urgent": "!"
+    },
+    "on-click": "activate"
+  },
+  "clock": {
+    "format": "  {:%H:%M    %d %b}",
+    "tooltip-format": "<big>{:%A, %d %B %Y}</big>\\n<tt>{:%H:%M:%S}</tt>"
+  },
+  "pulseaudio": {
+    "format": "  {volume}%",
+    "format-muted": "  muted",
+    "tooltip": true,
+    "scroll-step": 5,
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+  },
+  "network": {
+    "format-wifi": "  {signalStrength}%",
+    "format-ethernet": "  LAN",
+    "format-disconnected": "  offline",
+    "tooltip-format": "{essid}: {ipaddr}/{cidr}",
+    "interval": 5
+  },
+  "battery": {
+    "format": "  {capacity}%",
+    "format-charging": "  {capacity}%",
+    "format-plugged": "  AC",
+    "states": {"warning": 30, "critical": 15},
+    "tooltip": true
+  },
+  "tray": {
+    "icon-size": 17,
+    "spacing": 8,
+    "show-passive-items": true,
+    "tooltip": true
+  },
+  "custom/notification": {
+    "tooltip": true,
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "",
+      "none": "",
+      "dnd-notification": "",
+      "dnd-none": "",
+      "inhibited-notification": "",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "",
+      "dnd-inhibited-none": ""
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  }
+}

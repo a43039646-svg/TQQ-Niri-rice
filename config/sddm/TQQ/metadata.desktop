@@ -1,0 +1,14 @@
+[SddmGreeterTheme]
+Name=TQQ Niri Rice
+Description=Soft animated login screen for the TQQ Niri rice
+Author=Artur
+Copyright=Copyright (C) 2026
+License=MIT
+Type=sddm-theme
+Version=1.0
+Website=
+Screenshot=
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=TQQ
+Theme-API=2.0
