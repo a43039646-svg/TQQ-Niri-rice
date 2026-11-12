@@ -1,6 +1,12 @@
 # TQQ Niri rice
 
-A Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. Choose a wallpaper in the visual preview with the arrow keys; Matugen then regenerates the Waybar, SwayNC, and Fuzzel colors from that image, and updates 3D Fetch's label accent to the nearest terminal color.
+A lightweight Niri desktop setup for Linux, themed around *The Quintessential Quintuplets*. It is designed to keep resource usage low while still looking polished, making it a good fit for older and lower-spec laptops. Choose a wallpaper in the visual preview with the arrow keys; Matugen then regenerates the Waybar, SwayNC, and Fuzzel colors from that image, and updates 3D Fetch's label accent to the nearest terminal color.
+
+## Lightweight by design
+
+TQQ focuses on a responsive desktop without relying on a heavyweight widget framework or a pile of always-running background apps. It uses familiar, relatively lightweight components such as Waybar, SwayNC, and Fuzzel, and keeps the desktop features modular. That makes it suitable for modest hardware and older laptops, including systems with limited RAM.
+
+Actual performance depends on the hardware, graphics drivers, display resolution, wallpaper effects, and which optional components are enabled. For the lightest setup, keep optional effects and background applications to a minimum.
 
 ## Included
 
