@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add TQQ startup commands and Win+B without replacing Niri settings."""
+"""Migrate legacy rice leftovers and integrate TQQ startup, wallpaper, and Wi-Fi binds."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -82,6 +82,39 @@ def main() -> int:
         text,
     )
 
+    # Migrate known leftovers from earlier Itsuki/Miku-based configs.
+    # Keep useful visual settings, but remove stale labels and the duplicate Kitty rule.
+    text = re.sub(
+        r"(?ms)^[ \t]*// ITSUKI_KITTY_BLUR_BEGIN\n.*?^[ \t]*// ITSUKI_KITTY_BLUR_END[ \t]*(?:\n|$)",
+        "",
+        text,
+    )
+    marker_names = {
+        "BEGIN ITSUKI RICE STARTUP": "",
+        "END ITSUKI RICE STARTUP": "",
+        "MIKU_WINDOW_ROUNDING_START": "TQQ WINDOW ROUNDING START",
+        "MIKU_WINDOW_ROUNDING_END": "TQQ WINDOW ROUNDING END",
+        "MIKU_GLOBAL_BLUR": "TQQ GLOBAL BLUR",
+        "MIKU_KITTY_BLUR_BEGIN": "TQQ KITTY BLUR BEGIN",
+        "MIKU_KITTY_BLUR_END": "TQQ KITTY BLUR END",
+    }
+    text = re.sub(
+        r"(?m)^([ \t]*)// (BEGIN ITSUKI RICE STARTUP|END ITSUKI RICE STARTUP|MIKU_WINDOW_ROUNDING_START|MIKU_WINDOW_ROUNDING_END|MIKU_GLOBAL_BLUR|MIKU_KITTY_BLUR_BEGIN|MIKU_KITTY_BLUR_END)[ \t]*$",
+        lambda match: (match.group(1) + "// " + marker_names[match.group(2)]) if marker_names[match.group(2)] else "",
+        text,
+    )
+    text = re.sub(
+        r"(?m)^([ \t]*)Super\+Shift\+B[ \t]+hotkey-overlay-title=[^\n]*itsuki-reload-rice[^\n]*\n",
+        "",
+        text,
+    )
+    text = re.sub(
+        r'(?m)^([ \t]*)Super\+E[ \t]+hotkey-overlay-title="Miku Power Menu"[ \t]+\{[^\n]*\}.*$',
+        lambda match: match.group(1) + 'Super+E hotkey-overlay-title="TQQ Power Menu" { spawn ' + json.dumps(str(local_bin / "power-menu"), ensure_ascii=False) + '; }',
+        text,
+    )
+    text = text.replace('hotkey-overlay-title="Miku Quick Settings"', 'hotkey-overlay-title="TQQ Quick Settings"')
+
     binds_match = re.search(r"(?m)^([ \t]*)binds[ \t]*\{", text)
     if binds_match:
         opening = text.find("{", binds_match.start())
@@ -112,9 +145,12 @@ def main() -> int:
     wallpaper_key = choose(["Mod+B"])
 
     wallpaper = json.dumps(str(local_bin / "select-wallpaper"), ensure_ascii=False)
+    wifi_key = choose(["Mod+N", "Super+N", "Mod+Shift+N"])
+    wifi_menu = json.dumps(str(local_bin / "wifi-menu.py"), ensure_ascii=False)
     managed_binds = (
         "\n    // BEGIN TQQ NIRI BINDS\n"
-        f"    {wallpaper_key} {{ spawn {wallpaper}; }}\n"
+        f'    {wallpaper_key} hotkey-overlay-title="TQQ Wallpaper Picker" {{ spawn {wallpaper}; }}\n'
+        f'    {wifi_key} hotkey-overlay-title="TQQ Wi-Fi" {{ spawn {wifi_menu}; }}\n'
         "    // END TQQ NIRI BINDS\n"
     )
     if binds_match:
@@ -156,8 +192,8 @@ def main() -> int:
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(text)
     print(
-        "Preserved existing Niri binds and added the wallpaper/palette shortcut: "
-        f"{wallpaper_key} (Win+B)."
+        "Preserved user Niri settings; migrated legacy rice labels, removed the duplicate Kitty rule, "
+        f"and added TQQ wallpaper ({wallpaper_key}) and Wi-Fi ({wifi_key}) shortcuts."
     )
     return 0
 
