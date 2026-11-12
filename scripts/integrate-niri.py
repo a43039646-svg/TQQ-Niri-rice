@@ -140,12 +140,11 @@ def main() -> int:
                 return candidate
         raise ValueError("No free keybinding among: " + ", ".join(candidates))
 
-    # Win+B is the requested wallpaper + palette action. Keep all other
-    # existing bindings (including Fuzzel and power-menu shortcuts) untouched.
+    # Reserve Win+B for wallpaper selection and choose the first free Wi-Fi shortcut.
     wallpaper_key = choose(["Mod+B"])
 
     wallpaper = json.dumps(str(local_bin / "select-wallpaper"), ensure_ascii=False)
-    wifi_key = choose(["Mod+N", "Super+N", "Mod+Shift+N"])
+    wifi_key = choose(["Mod+N", "Mod+Shift+N", "Mod+Ctrl+N"])
     wifi_menu = json.dumps(str(local_bin / "wifi-menu.py"), ensure_ascii=False)
     managed_binds = (
         "\n    // BEGIN TQQ NIRI BINDS\n"

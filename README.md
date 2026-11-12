@@ -42,7 +42,7 @@ To install dependencies explicitly:
 ./install.sh --install-deps
 ```
 
-The installer backs up the existing Waybar, SwayNC, Fuzzel, Matugen, Fetch, and Niri configs under `~/.local/state/tqq-niri-rice/backups/`. It copies the included wallpapers to `${XDG_DATA_HOME:-~/.local/share}/tqq-niri-rice/wallpapers/` and installs helpers to `~/.local/bin/`. Existing Niri bindings are preserved; Win+B is reserved for wallpaper selection and palette generation, and Win+N (or the next free fallback) opens the TQQ Wi-Fi picker.
+The installer backs up the existing Waybar, SwayNC, Fuzzel, Matugen, Fetch, and Niri configs under `~/.local/state/tqq-niri-rice/backups/`. It copies the included wallpapers to `${XDG_DATA_HOME:-~/.local/share}/tqq-niri-rice/wallpapers/` and installs helpers to `~/.local/bin/`. Existing Niri bindings are preserved; Win+B is reserved for wallpaper selection and palette generation, and Win+N (falling back to Win+Shift+N or Win+Ctrl+N if occupied) opens the TQQ Wi-Fi picker.
 
 The regular installer does not change the display manager or install SDDM. Existing Niri and component configs are backed up before the rice files are installed. If an older version of this rice replaced the Niri config, the installer tries to restore the newest original config backup first.
 
@@ -77,6 +77,7 @@ The rice adds wallpaper and Wi-Fi shortcuts to the existing Niri config and leav
 | Action | Preferred key |
 | --- | --- |
 | Preview/apply wallpaper and update colors | `Mod+B` (Win+B) |
+| Open the TQQ Wi-Fi picker | `Mod+N` (Win+N; fallback `Mod+Shift+N` or `Mod+Ctrl+N`) |
 
 Waybar's audio capsule opens the SwayNC quick-settings panel. Right-clicking the notification capsule toggles Do Not Disturb.
 
